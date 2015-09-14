@@ -1,9 +1,14 @@
 import pandas as pd
 import numpy as np
 import re
+import sys
+
+reload(sys)
+sys.setdefaultencoding('utf8')
+
 
 # read in xls as a dataframe
-df = pd.read_excel('/Users/coristig/github/colin/sharks/GSAF5.xls')
+df = pd.read_excel('/Users/coristig/github/colin/sharks/GSAF5.xls',encoding='utf-8')
 
 # clean our columns
 df['Activity'] = df['Activity'].str.lower()
@@ -54,11 +59,15 @@ df['day'] = df['Date'].map(day)
 
 df.Activity.value_counts()
 
+# people murdered (thrown overboard to sharks)
 df[(df.Activity=='murder')][['Date','Country','Activity','Injury']]
 
-#df[df['Activity'].str.contains('diving')==True]['Activity'].value_counts()
+#
+len(df[df['Activity'].str.contains('diving')==True]['Activity'].value_counts())
+df[df['Activity'].str.contains('diving')==True]['Activity'].value_counts()
 
 def types(x):
+    #x = x.encode('utf-8').strip()
     if re.search(r'\bscuba\b',str(x)):
         x='scuba_diving'
         return x
@@ -116,9 +125,54 @@ df['Activity'] = df['Activity'].map(types)
 
 df.Type.value_counts()
 
+# create a plot for top attacks by activity over time
 top_activities = df[df.Type=='Unprovoked'].Activity.value_counts().index.tolist()[:10]
 df_top_activities = df[df.Activity.isin(top_activities) & (df.year >1950) & (df.Type=='Unprovoked')].dropna(axis=0,subset=['year'])
 df_top_activities.groupby(['Activity','year']).count().reset_index()
 
 years = range(1950, 2016)
 activities = df_top_activities.Activity.unique()
+
+import itertools
+
+# http://stackoverflow.com/questions/12130883/r-expand-grid-function-in-python
+def expandgrid(*itrs):
+   product = list(itertools.product(*itrs))
+   return {'Var{}'.format(i+1):[x[i] for x in product] for i in range(len(itrs))}
+
+all_combos = expandgrid(activities, years)
+all_combos = pd.DataFrame(all_combos)
+all_combos.columns = ["Activity", "year"]
+all_years = pd.merge(all_combos, df_top_activities, on=["year", "Activity"], how='left')
+all_years = all_years.groupby(['Activity','year']).count().reset_index()
+
+from ggplot import *
+
+ggplot(aes(x='year', y='Case Number', color='Activity'),all_years) + geom_line() + ylab("Number of Attacks") +\
+    xlab("Year") + ggtitle("Shark Attacks by Activity Type")
+    
+### FATAL Attacks
+top_activities = df[df.Type=='Unprovoked'].Activity.value_counts().index.tolist()[:10]
+df_top_activities = df[df.Activity.isin(top_activities) & (df.year >1950) & (df.Type=='Unprovoked') & (df.Fatal==True)].dropna(axis=0,subset=['year'])
+df_top_activities.groupby(['Activity','year']).count().reset_index()
+
+years = range(1950, 2016)
+activities = df_top_activities.Activity.unique()
+
+import itertools
+
+# http://stackoverflow.com/questions/12130883/r-expand-grid-function-in-python
+def expandgrid(*itrs):
+   product = list(itertools.product(*itrs))
+   return {'Var{}'.format(i+1):[x[i] for x in product] for i in range(len(itrs))}
+
+all_combos = expandgrid(activities, years)
+all_combos = pd.DataFrame(all_combos)
+all_combos.columns = ["Activity", "year"]
+all_years = pd.merge(all_combos, df_top_activities, on=["year", "Activity"], how='left')
+all_years = all_years.groupby(['Activity','year']).count().reset_index()
+
+from ggplot import *
+
+ggplot(aes(x='year', y='Case Number', color='Activity'),all_years) + geom_line() + ylab("Number of Attacks") +\
+    xlab("Year") + ggtitle("Fatal Shark Attacks by Activity Type")
