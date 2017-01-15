@@ -1,0 +1,7 @@
+ggplot==0.11.5
+matplotlib==1.5.3
+matplotlib==1.5.3
+numpy==1.11.3
+pandas==0.19.1
+geopy==1.11.0
+scikit_learn==0.18.1

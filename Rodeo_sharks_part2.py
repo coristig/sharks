@@ -7,6 +7,9 @@ from geopy.geocoders import Nominatim
 geolocator = GoogleV3()
 geolocator2 = Nominatim()
 
+# set our path
+path = '~/github/colin/sharks/'
+
 # test our geolocator:
 geolocator.geocode('66 w 39th street new york city')
 
@@ -20,8 +23,8 @@ def get_location(row):
         try:
             # try our first geocoder
             location = geolocator.geocode(loc)
-            print location
-            print row.index
+            print(location)
+            print(row.index)
             if not location==None:
                 lat = location[1][0]
                 long = location[1][1]
@@ -30,8 +33,8 @@ def get_location(row):
                 try:
                     # try our second geocoder if first one fails
                     location = geolocator.geocode2(loc)
-                    print location
-                    print row.index
+                    print(location)
+                    print(row.index)
                     if not location==None:
                         lat = location[1][0]
                         long = location[1][1]
@@ -46,11 +49,12 @@ def get_location(row):
             continue
         return row.latitude, row.longitude
 
-# running the code below takes a while.  We can read in the csv on line 53 
+# running the code below takes a while.  We can read in the csv on line 53
 # df2['latitude'], df2['longitude'] = zip(*df2.apply(get_location,axis=1))
 # df2.to_csv('./sharks_coords.csv',index=False)
 
-df2 = pd.read_csv('./sharks/sharks_coords.csv')
+
+df2 = pd.read_csv(path + 'data/sharks_coords.csv')
 df2[['Area','Location','Country','latitude', 'longitude']].head()
 
 # lets plot our attacks in the USA
@@ -58,14 +62,15 @@ df2[['Area','Location','Country','latitude', 'longitude']].head()
 # super useful for installing: http://ilessendata.blogspot.com/2014/02/making-maps-python.html
 from mpl_toolkits.basemap import Basemap
 import matplotlib.pyplot as plt
-%matplotlib inline
+# uncomment below if you're using a notebook
+# %matplotlib inline
 
-# create a new df with only locations we have coords for 
+# create a new df with only locations we have coords for
 dfc = df2.dropna(axis=0, subset=['latitude'])
 
 # USA Plot
 USA_map = Basemap(projection='mill', resolution = 'l', llcrnrlon=-180, llcrnrlat=2, urcrnrlon=-62, urcrnrlat=60)
-              
+
 plt.figure(figsize=(18,18))
 
 x1,y1 = USA_map(dfc['longitude'].tolist(), dfc['latitude'].tolist())
@@ -86,15 +91,15 @@ coords = np.column_stack((dfc.latitude,dfc.longitude))
 
 # create our tree
 tree = neighbors.KDTree(coords,leaf_size=2)
-dist, ind = tree.query(coords[7], k=6) # look at row 7    
-print ind[0]  # indices of 5 closest neighbors
-print sum(dist[0][1:])  # distances to 5 closest neighbors, excluding the point itself
+dist, ind = tree.query(coords[7], k=6) # look at row 7
+print(ind[0])  # indices of 5 closest neighbors
+print(sum(dist[0][1:]))  # distances to 5 closest neighbors, excluding the point itself
 
 sums = []
 for i in range(len(coords)):
     dist, ind = tree.query(coords[i], k=5)
     sums.append(sum(dist[0][1:]))
-    
+
 dfc['dist_sums'] = pd.Series(sums, index=dfc.index)
 
 outliers = dfc.sort(['dist_sums'], ascending=False)
@@ -103,7 +108,7 @@ outliers = dfc.sort(['dist_sums'], ascending=False)
 USA_map = Basemap(projection='mill', resolution = 'l',
     llcrnrlon=-180, llcrnrlat=2,
     urcrnrlon=-62, urcrnrlat=60)
-              
+
 plt.figure(figsize=(18,18))
 
 x1,y1 = USA_map(outliers['longitude'][25:].tolist(), outliers['latitude'][25:].tolist())
@@ -126,7 +131,7 @@ urcrnrlon=-113, urcrnrlat=44)
 
 plt.figure(figsize=(18,10))
 
-# coords for fatal attacks 
+# coords for fatal attacks
 x1,y1 = CA_map(outliers[(outliers.Area=='California')]['longitude'][:10].tolist(),outliers[(outliers.Area=='California')]['latitude'][:10].tolist())
 x2,y2 = CA_map(outliers[(outliers.Area=='California')]['longitude'][10:].tolist(),outliers[(outliers.Area=='California')]['latitude'][10:].tolist())
 

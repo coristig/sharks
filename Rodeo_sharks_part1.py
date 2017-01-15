@@ -6,9 +6,11 @@ import sys
 reload(sys)
 sys.setdefaultencoding('utf8')
 
+# set our path
+path = '~/github/colin/sharks/'
 
 # read in xls as a dataframe
-df = pd.read_excel('/Users/coristig/github/colin/sharks/GSAF5.xls',encoding='utf-8')
+df = pd.read_excel(path + 'data/GSAF5.xls',encoding='utf-8')
 
 # clean our columns
 df['Activity'] = df['Activity'].str.lower()
@@ -36,7 +38,7 @@ def year(x):
     res = re.search(r'([0-9]{4})',str(x))
     if res is None:
         return None
-    else: 
+    else:
         return int(res.group())
 
 def day(x):
@@ -45,7 +47,7 @@ def day(x):
         return None
     else:
         return int(res.group())
-    
+
 def month(x):
     res = re.search(r'(?!-)(([A-Za-z]{3}))(?=-)',str(x))
     if res is None:
@@ -150,7 +152,7 @@ from ggplot import *
 
 ggplot(aes(x='year', y='Case Number', color='Activity'),all_years) + geom_line() + ylab("Number of Attacks") +\
     xlab("Year") + ggtitle("Shark Attacks by Activity Type")
-    
+
 ### FATAL Attacks
 top_activities = df[df.Type=='Unprovoked'].Activity.value_counts().index.tolist()[:10]
 df_top_activities = df[df.Activity.isin(top_activities) & (df.year >1950) & (df.Type=='Unprovoked') & (df.Fatal==True)].dropna(axis=0,subset=['year'])
