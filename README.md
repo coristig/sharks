@@ -23,12 +23,20 @@ Packages we'll use (also listed in our `requirements.txt` file):
 | scikit_learn  |   0.18.1      |
 
 
-Files include:
+Files include:           
 
-* GSAF5.xls                              File from ISAF (http://www.sharkattackfile.net/spreadsheets/GSAF5.xls)
-* Rodeo_sharks_part1.py                  Part 1 of script (plotting, activites)
-* Rodeo_sharks_part2.py                  Part 2 of script (get our geocoordinates and plot them)
-* fatal_shark_attacks_by_activity.png
-* shark_activities.png
-* shark_attacks_by_activity_type.png
-* sharks_coords.csv                      csv with longitude and latitude computed
+```
+├── README.md
+├── Rodeo_sharks_part1.py   #Part 1 of script  (plotting, activites)
+├── Rodeo_sharks_part2.py   #Part 2 of script (geocoordinate plotting)
+├── data
+│   ├── GSAF5.xls           #File from ISAF (http://www.sharkattackfile.net/spreadsheets/GSAF5.xls)
+│   └── sharks_coords.csv   #csv with longitude and latitude computed
+├── imgs
+│   ├── USA_sharks.png
+│   ├── fatal_shark_attacks_by_activity.png
+│   ├── shark_activities.png
+│   ├── shark_attacks_by_activity_type.png
+│   └── shark_outliers.png
+└── requirements.txt
+```
